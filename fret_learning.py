@@ -2,6 +2,7 @@ import numpy as np
 import random
 import os
 import time
+import csv
 
 NOTES_PER_STRING = 12
 
@@ -31,6 +32,17 @@ TUNING = np.array(
         "E"
     ]
 )
+
+def readCSV():
+    with open('highscore.csv', newline='') as f:
+        reader = csv.reader(f)
+        data = list(reader)
+        return data
+
+def writeCSV(record):
+    with open('highscore.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerows(record)
 
 def notes_on_x_string(start_note, note_wanted):
     start_point = np.where(NOTES_ARR == start_note)
@@ -79,13 +91,28 @@ def notes_position(desired_note):
         aux+=1
     time_end = time.perf_counter()
     time_total = time_end - time_start
-    print("It took you " + str(round(time_total, 2)) + " seconds!")
 
+    record_keeper = readCSV()
+    auxX = 0
+    while auxX < 13:
+        if record_keeper[auxX][0] == desired_note:
+            if float(record_keeper[auxX][1])>float(time_total) or record_keeper[auxX][1] == '0':
+                print("NEW HIGHSCORE IN THE NOTE: " + desired_note)
+                record_keeper[auxX][1] = round(time_total, 2)
+                writeCSV(record_keeper)
+        auxX += 1    
+
+    print("It took you " + str(round(time_total, 2)) + " seconds!")
+    input("Press Enter!")
+    
 def main():
-    opc = input("Welcome \n1- Random note\n2- Choose a note\n")
-    if opc == str(1):
-        notes_position(np.random.choice(NOTES_ARR))
-    if opc == str(2):
-        notes_position(input("Choose the note:\n")) 
+    os.system("clear")
+    opc = ''
+    while opc != str(0):
+        opc = input("Welcome \n1- Random note\n2- Choose a note\n\n0- Exit\n")
+        if opc == str(1):
+            notes_position(np.random.choice(NOTES_ARR))
+        if opc == str(2):
+            notes_position(input("Choose the note:\n")) 
 
 main()
